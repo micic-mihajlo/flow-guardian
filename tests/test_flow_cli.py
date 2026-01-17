@@ -554,7 +554,7 @@ class TestSetupCommand:
         precompact_content = (tmp_path / ".claude" / "hooks" / "flow-precompact.sh").read_text()
         assert "#!/bin/bash" in precompact_content
         assert ".flow-guardian" in precompact_content
-        assert "flow inject --save-state" in precompact_content
+        assert "flow inject --quiet --save-state" in precompact_content
 
     def test_setup_environment_variable_warnings(self, cli_runner, tmp_path, monkeypatch):
         """setup should warn about missing environment variables."""

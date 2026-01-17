@@ -928,7 +928,7 @@ FLOW_PRECOMPACT_HOOK = '''#!/bin/bash
 
 if [ -d ".flow-guardian" ]; then
     [ -f ".env" ] && export $(grep -v '^#' .env | xargs)
-    flow inject --save-state 2>/dev/null
+    flow inject --quiet --save-state 2>/dev/null
 fi
 '''
 
