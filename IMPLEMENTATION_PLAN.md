@@ -11,7 +11,7 @@
 
 | File | Status | Lines of Code |
 |------|--------|---------------|
-| `flow.py` | ✅ **Fully Implemented** | 622 |
+| `flow_cli.py` | ✅ **Fully Implemented** | 817 |
 | `capture.py` | ✅ **Fully Implemented** | 238 |
 | `restore.py` | ✅ **Fully Implemented** | 378 |
 | `backboard_client.py` | ✅ **Fully Implemented** | 404 |
@@ -19,9 +19,11 @@
 | `memory.py` | ✅ **Fully Implemented** | 388 |
 | `cerebras_client.py` | ✅ **Fully Implemented** | 213 |
 | `git_utils.py` | ✅ **Fully Implemented** | 55 |
-| **TOTAL** | **All core modules complete** | **2,451** |
+| `daemon.py` | ✅ **Fully Implemented** | 506 |
+| `session_parser.py` | ✅ **Fully Implemented** | 178 |
+| **TOTAL** | **All Phase 1 modules complete** | **3,330** |
 
-**Specifications:** 10 complete spec files in `specs/` directory
+**Specifications:** 16 complete spec files in `specs/` directory
 **Dependencies:** Fully specified in `requirements.txt`
 **Reference implementation:** `backboard_client.py` code provided in `docs/HACKATHON_PLAN.md` (lines 154-318)
 
@@ -33,7 +35,25 @@
 
 > Automatic context injection. When you open Claude Code, it just knows.
 
-### P0: Handoff System
+**Verified Not Yet Implemented:**
+- `handoff.py` — NOT CREATED
+- `tldr.py` — NOT CREATED
+- `inject.py` — NOT CREATED
+- `.claude/` directory — NOT CREATED
+- `.flow-guardian/` directory — NOT CREATED
+- `flow inject` command — NOT IN CLI
+- `flow setup` command — NOT IN CLI
+
+**Dependencies:**
+```
+handoff.py ───┐
+              ├──► inject.py ──► flow inject ──► hooks ──► flow setup
+tldr.py ──────┘
+```
+
+---
+
+### P0-1: Handoff System (Foundation — implement first)
 
 - [ ] Create `handoff.py` module
   - [ ] `find_project_root(cwd)` — find project root via .flow-guardian/, .git/, pyproject.toml
@@ -41,69 +61,78 @@
   - [ ] `load_handoff(project_root)` — load YAML, return None if missing
   - [ ] `save_handoff(data, project_root)` — save with validation
   - [ ] `update_handoff(updates, project_root)` — merge updates
-- [ ] Update `flow save` to write handoff.yaml
-- [ ] Update daemon to update handoff.yaml on extraction
 - Spec: `specs/11_HANDOFF_SYSTEM.md`
 
-### P0: TLDR System
+### P0-2: TLDR System (Foundation — implement second)
 
 - [ ] Create `tldr.py` module
   - [ ] `summarize_context(content, level, max_tokens)` — Cerebras summarization
   - [ ] `summarize_handoff(handoff, level)` — handoff to TLDR string
   - [ ] `summarize_recall(results, level)` — recall results to TLDR
-  - [ ] `estimate_tokens(text)` — rough token count
+  - [ ] `estimate_tokens(text)` — rough token count (~4 chars per token)
 - [ ] Implement levels: L0 (paths), L1 (descriptions), L2 (logic), L3 (full)
-- [ ] Fallback when Cerebras unavailable
+- [ ] Fallback when Cerebras unavailable (return content as-is or truncated)
 - Spec: `specs/12_TLDR_SYSTEM.md`
 
-### P0: Inject Command
+### P0-3: Inject Module (Depends on handoff.py + tldr.py)
 
 - [ ] Create `inject.py` module
   - [ ] `generate_injection(level, quiet)` → formatted context string
   - [ ] `save_current_state()` → save to handoff.yaml
   - [ ] `format_injection(handoff, memory, quiet)` → output string
-- [ ] Add `flow inject` command to CLI
-  - [ ] `--quiet/-q` — plain output for hooks
-  - [ ] `--level/-l` — TLDR depth (default: L1)
-  - [ ] `--save-state` — save state mode for PreCompact
 - [ ] Integrate with Backboard semantic recall
 - Spec: `specs/13_HOOKS_INTEGRATION.md`
 
-### P1: Claude Code Hooks
+### P0-4: Inject Command (Depends on inject.py)
+
+- [ ] Add `flow inject` command to CLI (`flow_cli.py`)
+  - [ ] `--quiet/-q` — plain output for hooks
+  - [ ] `--level/-l` — TLDR depth (default: L1)
+  - [ ] `--save-state` — save state mode for PreCompact
+- Spec: `specs/13_HOOKS_INTEGRATION.md`
+
+### P0-5: Integration Updates (After inject command works)
+
+- [ ] Update `flow save` to write handoff.yaml after session storage
+- [ ] Update `daemon.py` to update handoff.yaml on extraction
+
+### P1-1: Claude Code Hooks (Depends on flow inject)
 
 - [ ] Create `.claude/hooks/flow-inject.sh` — SessionStart hook
 - [ ] Create `.claude/hooks/flow-precompact.sh` — PreCompact hook
-- [ ] Generate `.claude/settings.json` hook configuration
+- [ ] Define hook configuration for `.claude/settings.json`
 - Spec: `specs/13_HOOKS_INTEGRATION.md`
 
-### P1: Setup Command
+### P1-2: Setup Command (Depends on hooks defined)
 
-- [ ] Add `flow setup` command
+- [ ] Add `flow setup` command to CLI
   - [ ] Create `.flow-guardian/` directory
-  - [ ] Create `.flow-guardian/handoff.yaml`
-  - [ ] Create `.flow-guardian/config.yaml`
-  - [ ] Create `.claude/hooks/` with scripts
-  - [ ] Update `.claude/settings.json`
-  - [ ] `--global/-g` for user-level hooks
-  - [ ] `--check/-c` for status check
-  - [ ] `--force/-f` to overwrite
-- [ ] Verify environment (API keys)
+  - [ ] Create `.flow-guardian/handoff.yaml` (initial empty state)
+  - [ ] Create `.flow-guardian/config.yaml` (local overrides)
+  - [ ] Create `.claude/hooks/` with hook scripts
+  - [ ] Update/create `.claude/settings.json` with hook registration
+  - [ ] `--global/-g` for user-level hooks (`~/.claude/hooks/`)
+  - [ ] `--check/-c` for status check without modifying
+  - [ ] `--force/-f` to overwrite existing files
+- [ ] Verify environment (BACKBOARD_API_KEY, CEREBRAS_API_KEY)
 - Spec: `specs/15_SETUP_COMMAND.md`
 
-### P2: Semantic Recall Optimization
+### P2-1: Semantic Recall Optimization
 
-- [ ] Context-aware queries (project name, branch, focus)
-- [ ] Result categorization (learnings, decisions, context)
-- [ ] Local fallback via memory.py
+- [ ] Context-aware queries in inject.py (include project name, branch, focus)
+- [ ] Result categorization (learnings, decisions, context, insights)
+- [ ] Relevance scoring (recency boost, branch match, file overlap)
+- [ ] Local fallback via memory.py when Backboard unavailable
 - Spec: `specs/14_SEMANTIC_RECALL.md`
 
-### P2: Testing & Polish
+### P2-2: Testing & Polish
 
-- [ ] Tests for handoff.py
-- [ ] Tests for tldr.py
-- [ ] Tests for inject.py
-- [ ] Tests for setup command
+- [ ] `test_handoff.py` — load/save/update/validation
+- [ ] `test_tldr.py` — summarization levels, token estimation, fallback
+- [ ] `test_inject.py` — injection generation, formatting, state save
+- [ ] `test_setup_command.py` — directory creation, hook scripts, settings
 - [ ] End-to-end test: save → close → reopen → context restored
+- [ ] Add missing tests for `daemon.py` and `session_parser.py`
 
 ---
 
@@ -188,7 +217,7 @@
 - [x] `detect_conflicts(session)` → highlight if current state conflicts with checkpoint
 - Spec: `specs/02_RESUME_COMMAND.md`
 
-### 2.3 Implement `flow.py` CLI — Core Commands ✅
+### 2.3 Implement `flow_cli.py` CLI — Core Commands ✅
 - [x] Set up Click CLI framework with `flow` as main command group
 - [x] Add Rich console for formatted output
 - [x] Load environment variables with python-dotenv
@@ -276,16 +305,20 @@
 
 ```
 flow-guardian/
-├── flow.py              # ✅ CLI entry (Click + Rich) - 622 lines
-├── capture.py           # ✅ Git state extraction + Cerebras analysis - 240 lines
-├── restore.py           # ✅ Change detection + restoration - 380 lines
+├── flow_cli.py          # ✅ CLI entry (Click + Rich) - 817 lines
+├── capture.py           # ✅ Git state extraction + Cerebras analysis - 238 lines
+├── restore.py           # ✅ Change detection + restoration - 378 lines
 ├── memory.py            # ✅ Local storage fallback - 388 lines
 ├── cerebras_client.py   # ✅ Cerebras LLM client - 213 lines
 ├── backboard_client.py  # ✅ Backboard.io API client - 404 lines
 ├── setup_assistants.py  # ✅ One-time Backboard.io setup - 153 lines
-├── git_utils.py         # ✅ Shared git utilities - 53 lines
-├── src/lib/             # Shared utilities (currently empty)
-├── specs/               # Feature PRDs (10 files, complete)
+├── git_utils.py         # ✅ Shared git utilities - 55 lines
+├── daemon.py            # ✅ Background session watcher - 506 lines
+├── session_parser.py    # ✅ Claude session file parser - 178 lines
+├── handoff.py           # 🚧 NOT CREATED - Phase 2
+├── tldr.py              # 🚧 NOT CREATED - Phase 2
+├── inject.py            # 🚧 NOT CREATED - Phase 2
+├── specs/               # Feature PRDs (16 files, complete)
 ├── docs/                # HACKATHON_PLAN.md with reference code
 ├── tests/               # ✅ Test suite - 139 passing tests
 │   ├── __init__.py
@@ -300,19 +333,47 @@ flow-guardian/
 └── pytest.ini           # ✅ Pytest configuration
 ```
 
+**Phase 2 will add:**
+```
+.flow-guardian/          # Per-project state directory
+├── handoff.yaml         # Session handoff state
+└── config.yaml          # Local configuration overrides
+
+.claude/                 # Claude Code integration
+├── hooks/
+│   ├── flow-inject.sh   # SessionStart hook
+│   └── flow-precompact.sh # PreCompact hook
+└── settings.json        # Hook registration
+```
+
 ---
 
-## Implementation Order (Critical Path) ✅ ALL COMPLETE
+## Implementation Order (Critical Path)
+
+### Phase 1 ✅ ALL COMPLETE
 
 1. ✅ **`cerebras_client.py`** — Required by capture.py and restore.py
 2. ✅ **`memory.py`** — Required for local fallback (always needed)
 3. ✅ **`backboard_client.py`** — Required for cloud storage
 4. ✅ **`capture.py`** — Depends on cerebras_client
 5. ✅ **`restore.py`** — Depends on cerebras_client
-6. ✅ **`flow.py` (save + resume)** — Depends on all above
+6. ✅ **`flow_cli.py` (save + resume)** — Depends on all above
 7. ✅ **`setup_assistants.py`** — Depends on backboard_client
-8. ✅ **`flow.py` (learn + recall + team)** — Depends on backboard_client
-9. ✅ **`flow.py` (status + history)** — Depends on memory.py
+8. ✅ **`flow_cli.py` (learn + recall + team)** — Depends on backboard_client
+9. ✅ **`flow_cli.py` (status + history)** — Depends on memory.py
+10. ✅ **`daemon.py`** — Background session watcher
+11. ✅ **`session_parser.py`** — Claude session file parser
+
+### Phase 2 (CURRENT) — Implementation Order
+
+1. 🚧 **`handoff.py`** — Foundation module, no dependencies
+2. 🚧 **`tldr.py`** — Foundation module, depends on cerebras_client
+3. 🚧 **`inject.py`** — Depends on handoff.py, tldr.py, backboard_client
+4. 🚧 **`flow inject` command** — Depends on inject.py
+5. 🚧 **Update `flow save`** — Add handoff.yaml write after session storage
+6. 🚧 **Update `daemon.py`** — Add handoff.yaml update on extraction
+7. 🚧 **Hook scripts** — Depends on flow inject working
+8. 🚧 **`flow setup` command** — Depends on hooks being defined
 
 ---
 
@@ -345,7 +406,26 @@ flow-guardian/
 | `restore.py` | `test_restore.py` | Change detection, restoration messages, conflicts |
 | `cerebras_client.py` | `test_cerebras_client.py` | LLM inference, error handling, rate limiting |
 | `backboard_client.py` | `test_backboard_client.py` | API calls, retry logic, error classes, create_assistant, create_thread |
-| `flow.py` | `test_flow_cli.py` | All CLI commands (save, resume, learn, recall, team, status, history) |
+| `flow_cli.py` | `test_flow_cli.py` | All CLI commands (save, resume, learn, recall, team, status, history) |
 | `setup_assistants.py` | `test_setup_assistants.py` | Personal and team assistant setup, error handling |
 
 **Run tests:** `pytest` or `pytest -v` for verbose output
+
+---
+
+## Known Issues & Technical Debt
+
+### Minor Code Quality Issues
+- `restore.py`: Timezone handling logic repeated multiple times (lines 27, 32, 76, 80-81, 128-129) — could be extracted to helper
+- `backboard_client.py`: `store_message()` checks API_KEY twice redundantly
+- `cerebras_client.py`: Error detection uses string parsing ("401" in error_str) — brittle approach
+- Multiple files use `# type: ignore` for loose SDK type hints
+
+### Test Suite Notes
+- Some tests in `test_git_utils.py`, `test_capture.py`, `test_restore.py` run actual git commands (integration-style)
+- Time-sensitive tests in `test_restore.py` use `datetime.now()` — could be flaky during DST transitions
+- No tests for `daemon.py` or `session_parser.py` — should add in Phase 2
+
+### Missing from Tests
+- [ ] `test_daemon.py` — daemon start/stop, insight extraction, state management
+- [ ] `test_session_parser.py` — session discovery, message parsing, conversation text
