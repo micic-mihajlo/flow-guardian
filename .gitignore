@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.flowguardian/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Embedded repositories
+testsql/sqlite/
