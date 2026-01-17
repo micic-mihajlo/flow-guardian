@@ -239,8 +239,8 @@ async def store_session(thread_id: str, session: dict) -> dict:
     git = session.get("git", {})
 
     # Build content for storage
-    files_str = ', '.join(context.get('files', [])[:3]) if context.get('files') else 'none'
-    next_steps_str = ', '.join(context.get('next_steps', [])[:2]) if context.get('next_steps') else 'none'
+    files_str = ', '.join(context.get('files', [])) if context.get('files') else 'none'
+    next_steps_str = ', '.join(context.get('next_steps', [])) if context.get('next_steps') else 'none'
 
     content = f"""## Context Snapshot
 **Working on:** {context.get('summary', 'unknown')}
@@ -254,7 +254,7 @@ async def store_session(thread_id: str, session: dict) -> dict:
         "session_id": session.get("id"),
         "timestamp": session.get("timestamp") or datetime.now().isoformat(),
         "branch": git.get("branch"),
-        "files": context.get("files", [])[:3],  # Limit files for API
+        "files": context.get("files", []),
         "tags": session.get("metadata", {}).get("tags", [])
     }
 
