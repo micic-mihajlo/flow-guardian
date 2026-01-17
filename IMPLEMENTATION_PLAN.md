@@ -2,8 +2,8 @@
 
 > Flow Guardian — "Claude forgets. Flow Guardian remembers."
 
-**Last Updated:** 2026-01-16
-**Status:** ✅ **MVP COMPLETE — Ready for Demo**
+**Last Updated:** 2026-01-17
+**Status:** 🚧 **Phase 2: Seamless Context System**
 
 ---
 
@@ -25,7 +25,85 @@
 **Dependencies:** Fully specified in `requirements.txt`
 **Reference implementation:** `backboard_client.py` code provided in `docs/HACKATHON_PLAN.md` (lines 154-318)
 
-**All Priority 1-5 tasks completed. MVP is fully functional and ready for demonstration.**
+**Phase 1 (MVP) complete. Now implementing Phase 2: Seamless Context System.**
+
+---
+
+## Phase 2: Seamless Context System (CURRENT)
+
+> Automatic context injection. When you open Claude Code, it just knows.
+
+### P0: Handoff System
+
+- [ ] Create `handoff.py` module
+  - [ ] `find_project_root(cwd)` — find project root via .flow-guardian/, .git/, pyproject.toml
+  - [ ] `get_handoff_path(project_root)` — path to `.flow-guardian/handoff.yaml`
+  - [ ] `load_handoff(project_root)` — load YAML, return None if missing
+  - [ ] `save_handoff(data, project_root)` — save with validation
+  - [ ] `update_handoff(updates, project_root)` — merge updates
+- [ ] Update `flow save` to write handoff.yaml
+- [ ] Update daemon to update handoff.yaml on extraction
+- Spec: `specs/11_HANDOFF_SYSTEM.md`
+
+### P0: TLDR System
+
+- [ ] Create `tldr.py` module
+  - [ ] `summarize_context(content, level, max_tokens)` — Cerebras summarization
+  - [ ] `summarize_handoff(handoff, level)` — handoff to TLDR string
+  - [ ] `summarize_recall(results, level)` — recall results to TLDR
+  - [ ] `estimate_tokens(text)` — rough token count
+- [ ] Implement levels: L0 (paths), L1 (descriptions), L2 (logic), L3 (full)
+- [ ] Fallback when Cerebras unavailable
+- Spec: `specs/12_TLDR_SYSTEM.md`
+
+### P0: Inject Command
+
+- [ ] Create `inject.py` module
+  - [ ] `generate_injection(level, quiet)` → formatted context string
+  - [ ] `save_current_state()` → save to handoff.yaml
+  - [ ] `format_injection(handoff, memory, quiet)` → output string
+- [ ] Add `flow inject` command to CLI
+  - [ ] `--quiet/-q` — plain output for hooks
+  - [ ] `--level/-l` — TLDR depth (default: L1)
+  - [ ] `--save-state` — save state mode for PreCompact
+- [ ] Integrate with Backboard semantic recall
+- Spec: `specs/13_HOOKS_INTEGRATION.md`
+
+### P1: Claude Code Hooks
+
+- [ ] Create `.claude/hooks/flow-inject.sh` — SessionStart hook
+- [ ] Create `.claude/hooks/flow-precompact.sh` — PreCompact hook
+- [ ] Generate `.claude/settings.json` hook configuration
+- Spec: `specs/13_HOOKS_INTEGRATION.md`
+
+### P1: Setup Command
+
+- [ ] Add `flow setup` command
+  - [ ] Create `.flow-guardian/` directory
+  - [ ] Create `.flow-guardian/handoff.yaml`
+  - [ ] Create `.flow-guardian/config.yaml`
+  - [ ] Create `.claude/hooks/` with scripts
+  - [ ] Update `.claude/settings.json`
+  - [ ] `--global/-g` for user-level hooks
+  - [ ] `--check/-c` for status check
+  - [ ] `--force/-f` to overwrite
+- [ ] Verify environment (API keys)
+- Spec: `specs/15_SETUP_COMMAND.md`
+
+### P2: Semantic Recall Optimization
+
+- [ ] Context-aware queries (project name, branch, focus)
+- [ ] Result categorization (learnings, decisions, context)
+- [ ] Local fallback via memory.py
+- Spec: `specs/14_SEMANTIC_RECALL.md`
+
+### P2: Testing & Polish
+
+- [ ] Tests for handoff.py
+- [ ] Tests for tldr.py
+- [ ] Tests for inject.py
+- [ ] Tests for setup command
+- [ ] End-to-end test: save → close → reopen → context restored
 
 ---
 
