@@ -189,6 +189,7 @@
 - [ ] Beautiful Rich output panels for all commands
 - [ ] Edge case handling: non-git repos, empty repos, API failures
 - [ ] Demo script preparation
+- [x] **Test infrastructure** — 120 passing tests covering all core modules
 
 ---
 
@@ -206,7 +207,15 @@ flow-guardian/
 ├── src/lib/             # Shared utilities (currently empty)
 ├── specs/               # Feature PRDs (10 files, complete)
 ├── docs/                # HACKATHON_PLAN.md with reference code
-└── tests/               # Test files [NOT CREATED]
+├── tests/               # ✅ Test suite - 120 passing tests
+│   ├── __init__.py
+│   ├── test_memory.py
+│   ├── test_capture.py
+│   ├── test_restore.py
+│   ├── test_cerebras_client.py
+│   ├── test_backboard_client.py
+│   └── test_flow_cli.py
+└── pytest.ini           # ✅ Pytest configuration
 ```
 
 ---
@@ -239,3 +248,20 @@ flow-guardian/
 - ✅ `flow status` — View current state and stats
 - ✅ `flow history` — Browse past sessions
 - ✅ `flow recall` — Search personal learnings
+
+---
+
+## Testing
+
+**Test Suite:** 120 passing tests with pytest
+
+| Module | Test File | Coverage |
+|--------|-----------|----------|
+| `memory.py` | `test_memory.py` | Storage, sessions, learnings, config |
+| `capture.py` | `test_capture.py` | Git state capture, diff summary, context analysis |
+| `restore.py` | `test_restore.py` | Change detection, restoration messages, conflicts |
+| `cerebras_client.py` | `test_cerebras_client.py` | LLM inference, error handling, rate limiting |
+| `backboard_client.py` | `test_backboard_client.py` | API calls, retry logic, error classes |
+| `flow.py` | `test_flow_cli.py` | All CLI commands (save, resume, learn, recall, team, status, history) |
+
+**Run tests:** `pytest` or `pytest -v` for verbose output
