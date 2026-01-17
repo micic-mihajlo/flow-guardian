@@ -123,10 +123,10 @@ tldr.py ──────┘
 
 ### P2-1: Semantic Recall Optimization
 
-- [ ] Context-aware queries in inject.py (include project name, branch, focus)
-- [ ] Result categorization (learnings, decisions, context, insights)
-- [ ] Relevance scoring (recency boost, branch match, file overlap)
-- [ ] Local fallback via memory.py when Backboard unavailable
+- [x] Context-aware queries in inject.py (include project name, branch, focus)
+- [x] Result categorization (learnings, decisions, context, insights)
+- [x] Relevance scoring (recency boost, branch match, file overlap)
+- [x] Local fallback via memory.py when Backboard unavailable
 - Spec: `specs/14_SEMANTIC_RECALL.md`
 
 ### P2-2: Testing & Polish
@@ -135,7 +135,7 @@ tldr.py ──────┘
 - [x] `test_tldr.py` — summarization levels, token estimation, fallback (35 tests)
 - [x] `test_inject.py` — injection generation, formatting, state save (19 tests)
 - [x] `test_setup_command.py` — directory creation, hook scripts, settings (4 tests)
-- [ ] End-to-end test: save → close → reopen → context restored
+- [x] End-to-end test: save → close → reopen → context restored (13 tests in test_e2e.py)
 - [ ] Add missing tests for `daemon.py` and `session_parser.py`
 
 ---
@@ -325,7 +325,7 @@ flow-guardian/
 ├── flow.py              # ✅ CLI entry point - 17 lines
 ├── specs/               # Feature PRDs (16 files, complete)
 ├── docs/                # HACKATHON_PLAN.md with reference code
-├── tests/               # ✅ Test suite - 229 passing tests (139 Phase 1 + 90 Phase 2)
+├── tests/               # ✅ Test suite - 324 passing tests
 │   ├── __init__.py
 │   ├── test_memory.py
 │   ├── test_capture.py
@@ -405,7 +405,7 @@ flow-guardian/
 
 ## Testing
 
-**Test Suite:** 214 passing / 233 total tests (19 pre-existing failures in Phase 1 tests, see Known Issues)
+**Test Suite:** 324 passing tests
 
 | Module | Test File | Coverage |
 |--------|-----------|----------|
@@ -421,6 +421,10 @@ flow-guardian/
 | `tldr.py` | `test_tldr.py` | Summarization levels, token estimation, fallback |
 | `inject.py` | `test_inject.py` | Injection generation, formatting, state save |
 | `flow setup` | `test_setup_command.py` | Directory creation, hook scripts, settings |
+| `daemon.py` | `test_daemon.py` | Logging, state management, insight extraction, daemon control |
+| `session_parser.py` | `test_session_parser.py` | Session discovery, message parsing, conversation text |
+| `e2e` | `test_e2e.py` | Save/restore flow, context persistence, injection levels |
+| `semantic recall` | `test_semantic_recall.py` | Query building, scoring, categorization, fallback |
 
 **Run tests:** `pytest` or `pytest -v` for verbose output
 
@@ -438,11 +442,4 @@ flow-guardian/
 - Some tests in `test_git_utils.py`, `test_capture.py`, `test_restore.py` run actual git commands (integration-style)
 - Time-sensitive tests in `test_restore.py` use `datetime.now()` — could be flaky during DST transitions
 
-### Pre-existing Test Failures (19 tests)
-- `test_cerebras_client.py` (13 tests): Tests expect `API_KEY` as module-level variable but implementation uses `_get_api_key()` function
-- `test_backboard_client.py` (6 tests): Mock expectations don't match httpx response structure (KeyError issues)
-- These are test-implementation mismatches, not actual bugs in the code
-
 ### Missing from Tests
-- [ ] `test_daemon.py` — daemon start/stop, insight extraction, state management
-- [ ] `test_session_parser.py` — session discovery, message parsing, conversation text
