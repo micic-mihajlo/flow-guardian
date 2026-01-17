@@ -12,13 +12,14 @@
 | File | Status | Lines of Code |
 |------|--------|---------------|
 | `flow.py` | ✅ **Fully Implemented** | 622 |
-| `capture.py` | ✅ **Fully Implemented** | 263 |
-| `restore.py` | ✅ **Fully Implemented** | 407 |
+| `capture.py` | ✅ **Fully Implemented** | 238 |
+| `restore.py` | ✅ **Fully Implemented** | 378 |
 | `backboard_client.py` | ✅ **Fully Implemented** | 404 |
 | `setup_assistants.py` | ✅ **Fully Implemented** | 153 |
 | `memory.py` | ✅ **Fully Implemented** | 388 |
 | `cerebras_client.py` | ✅ **Fully Implemented** | 213 |
-| **TOTAL** | **All core modules complete** | **2,450** |
+| `git_utils.py` | ✅ **Fully Implemented** | 55 |
+| **TOTAL** | **All core modules complete** | **2,451** |
 
 **Specifications:** 10 complete spec files in `specs/` directory
 **Dependencies:** Fully specified in `requirements.txt`
@@ -189,7 +190,7 @@
 - [x] Beautiful Rich output panels for all commands — Color-coded panels for save, resume, learn, recall, team, status, history
 - [x] Edge case handling: non-git repos, empty repos, API failures — Verified working in non-git directories
 - [ ] Demo script preparation — Optional polish item
-- [x] **Test infrastructure** — 132 passing tests covering all core modules
+- [x] **Test infrastructure** — 139 passing tests covering all core modules
 
 ---
 
@@ -198,16 +199,17 @@
 ```
 flow-guardian/
 ├── flow.py              # ✅ CLI entry (Click + Rich) - 622 lines
-├── capture.py           # ✅ Git state extraction + Cerebras analysis - 263 lines
-├── restore.py           # ✅ Change detection + restoration - 407 lines
+├── capture.py           # ✅ Git state extraction + Cerebras analysis - 240 lines
+├── restore.py           # ✅ Change detection + restoration - 380 lines
 ├── memory.py            # ✅ Local storage fallback - 388 lines
 ├── cerebras_client.py   # ✅ Cerebras LLM client - 213 lines
 ├── backboard_client.py  # ✅ Backboard.io API client - 404 lines
 ├── setup_assistants.py  # ✅ One-time Backboard.io setup - 153 lines
+├── git_utils.py         # ✅ Shared git utilities - 53 lines
 ├── src/lib/             # Shared utilities (currently empty)
 ├── specs/               # Feature PRDs (10 files, complete)
 ├── docs/                # HACKATHON_PLAN.md with reference code
-├── tests/               # ✅ Test suite - 132 passing tests
+├── tests/               # ✅ Test suite - 139 passing tests
 │   ├── __init__.py
 │   ├── test_memory.py
 │   ├── test_capture.py
@@ -215,7 +217,8 @@ flow-guardian/
 │   ├── test_cerebras_client.py
 │   ├── test_backboard_client.py
 │   ├── test_flow_cli.py
-│   └── test_setup_assistants.py
+│   ├── test_setup_assistants.py
+│   └── test_git_utils.py
 └── pytest.ini           # ✅ Pytest configuration
 ```
 
@@ -254,10 +257,11 @@ flow-guardian/
 
 ## Testing
 
-**Test Suite:** 132 passing tests with pytest
+**Test Suite:** 139 passing tests with pytest
 
 | Module | Test File | Coverage |
 |--------|-----------|----------|
+| `git_utils.py` | `test_git_utils.py` | Git command execution, repo detection, branch retrieval |
 | `memory.py` | `test_memory.py` | Storage, sessions, learnings, config |
 | `capture.py` | `test_capture.py` | Git state capture, diff summary, context analysis |
 | `restore.py` | `test_restore.py` | Change detection, restoration messages, conflicts |

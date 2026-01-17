@@ -2,39 +2,14 @@
 
 Handles git state extraction and context analysis via Cerebras.
 """
-import subprocess
 from datetime import datetime
 from typing import Optional
 
 import cerebras_client
+from git_utils import run_git_command, is_git_repo
 
 
 # ============ GIT STATE EXTRACTION ============
-
-def _run_git_command(args: list[str]) -> tuple[bool, str]:
-    """
-    Run a git command and return (success, output).
-    """
-    try:
-        result = subprocess.run(
-            ["git"] + args,
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-        return result.returncode == 0, result.stdout.strip()
-    except subprocess.TimeoutExpired:
-        return False, ""
-    except FileNotFoundError:
-        return False, ""
-
-
-def is_git_repo() -> bool:
-    """
-    Check if current directory is a git repository.
-    """
-    success, _ = _run_git_command(["rev-parse", "--git-dir"])
-    return success
 
 
 def capture_git_state() -> dict:
@@ -59,13 +34,13 @@ def capture_git_state() -> dict:
         }
 
     # Get current branch
-    success, branch = _run_git_command(["rev-parse", "--abbrev-ref", "HEAD"])
+    success, branch = run_git_command(["rev-parse", "--abbrev-ref", "HEAD"])
     if not success:
         branch = "unknown"
 
     # Get uncommitted files (staged + unstaged)
     uncommitted_files = []
-    success, status_output = _run_git_command(["status", "--porcelain"])
+    success, status_output = run_git_command(["status", "--porcelain"])
     if success and status_output:
         for line in status_output.split("\n"):
             if line.strip():
@@ -78,7 +53,7 @@ def capture_git_state() -> dict:
 
     # Get recent commits (last 5)
     recent_commits = []
-    success, log_output = _run_git_command([
+    success, log_output = run_git_command([
         "log", "--oneline", "-n", "5", "--format=%h %s"
     ])
     if success and log_output:
@@ -86,7 +61,7 @@ def capture_git_state() -> dict:
 
     # Get last commit details
     last_commit = None
-    success, commit_output = _run_git_command([
+    success, commit_output = run_git_command([
         "log", "-1", "--format=%H|%s"
     ])
     if success and commit_output and "|" in commit_output:
@@ -116,10 +91,10 @@ def get_diff_summary() -> str:
         return ""
 
     # Get diff stat for staged changes
-    success, staged_diff = _run_git_command(["diff", "--cached", "--stat"])
+    success, staged_diff = run_git_command(["diff", "--cached", "--stat"])
 
     # Get diff stat for unstaged changes
-    success2, unstaged_diff = _run_git_command(["diff", "--stat"])
+    success2, unstaged_diff = run_git_command(["diff", "--stat"])
 
     parts = []
     if staged_diff:
@@ -144,7 +119,7 @@ def get_detailed_diff(max_lines: int = 100) -> str:
         return ""
 
     # Get combined diff (staged + unstaged)
-    success, diff_output = _run_git_command(["diff", "HEAD"])
+    success, diff_output = run_git_command(["diff", "HEAD"])
 
     if not success or not diff_output:
         return ""

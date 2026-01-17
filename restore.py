@@ -2,37 +2,11 @@
 
 Handles change detection and restoration message generation.
 """
-import subprocess
 from datetime import datetime
 from typing import Optional
 
 import cerebras_client
-
-
-# ============ HELPERS ============
-
-def _run_git_command(args: list[str]) -> tuple[bool, str]:
-    """
-    Run a git command and return (success, output).
-    """
-    try:
-        result = subprocess.run(
-            ["git"] + args,
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-        return result.returncode == 0, result.stdout.strip()
-    except subprocess.TimeoutExpired:
-        return False, ""
-    except FileNotFoundError:
-        return False, ""
-
-
-def _is_git_repo() -> bool:
-    """Check if current directory is a git repository."""
-    success, _ = _run_git_command(["rev-parse", "--git-dir"])
-    return success
+from git_utils import run_git_command, is_git_repo, get_current_branch as _get_current_branch
 
 
 # ============ TIME CALCULATIONS ============
@@ -132,7 +106,7 @@ def get_changes_since(checkpoint_timestamp: str) -> dict:
     elapsed = calculate_time_elapsed(checkpoint_timestamp)
     is_stale = is_session_stale(checkpoint_timestamp)
 
-    if not _is_git_repo():
+    if not is_git_repo():
         return {
             "elapsed": elapsed,
             "commits": [],
@@ -157,7 +131,7 @@ def get_changes_since(checkpoint_timestamp: str) -> dict:
         # Format for git: YYYY-MM-DD HH:MM:SS
         since_str = checkpoint_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        success, log_output = _run_git_command([
+        success, log_output = run_git_command([
             "log", f"--since={since_str}", "--oneline", "-n", "20"
         ])
 
@@ -170,7 +144,7 @@ def get_changes_since(checkpoint_timestamp: str) -> dict:
     # Get files changed in those commits
     files_changed = []
     if commits:
-        success, diff_output = _run_git_command([
+        success, diff_output = run_git_command([
             "diff", "--name-only", f"HEAD~{len(commits)}", "HEAD"
         ])
         if success and diff_output:
@@ -196,13 +170,13 @@ def detect_conflicts(session: dict) -> list[str]:
     """
     conflicts: list[str] = []
 
-    if not _is_git_repo():
+    if not is_git_repo():
         return conflicts
 
     # Check branch mismatch
     checkpoint_branch = session.get("git", {}).get("branch")
     if checkpoint_branch:
-        success, current_branch = _run_git_command([
+        success, current_branch = run_git_command([
             "rev-parse", "--abbrev-ref", "HEAD"
         ])
         if success and current_branch != checkpoint_branch:
@@ -213,7 +187,7 @@ def detect_conflicts(session: dict) -> list[str]:
     # Check for uncommitted changes that might conflict
     checkpoint_files = set(session.get("git", {}).get("uncommitted_files", []))
     if checkpoint_files:
-        success, status = _run_git_command(["status", "--porcelain"])
+        success, status = run_git_command(["status", "--porcelain"])
         if success and status:
             current_files = set()
             for line in status.split("\n"):
@@ -235,10 +209,7 @@ def detect_conflicts(session: dict) -> list[str]:
 
 def get_current_branch() -> Optional[str]:
     """Get the current git branch name."""
-    if not _is_git_repo():
-        return None
-    success, branch = _run_git_command(["rev-parse", "--abbrev-ref", "HEAD"])
-    return branch if success else None
+    return _get_current_branch()
 
 
 # ============ RESTORATION MESSAGE ============

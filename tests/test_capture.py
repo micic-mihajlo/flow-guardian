@@ -1,5 +1,4 @@
 """Tests for the capture.py context capture module."""
-import subprocess
 from datetime import datetime
 from unittest import mock
 
@@ -76,34 +75,6 @@ class TestGitState:
         lines = result.split("\n") if result else []
         # Even truncated, should be reasonable length
         assert len(lines) <= 10  # Allow some buffer
-
-
-class TestRunGitCommand:
-    """Tests for _run_git_command helper."""
-
-    def test_successful_command(self):
-        """_run_git_command should return success for valid commands."""
-        success, output = capture._run_git_command(["--version"])
-
-        assert success is True
-        assert "git version" in output.lower()
-
-    def test_failed_command(self):
-        """_run_git_command should return failure for invalid commands."""
-        success, output = capture._run_git_command(["invalid-command-xyz"])
-
-        assert success is False
-
-    def test_handles_timeout(self):
-        """_run_git_command should handle timeouts gracefully."""
-        # Mock subprocess.run to raise TimeoutExpired
-        with mock.patch('subprocess.run') as mock_run:
-            mock_run.side_effect = subprocess.TimeoutExpired("git", 10)
-
-            success, output = capture._run_git_command(["status"])
-
-            assert success is False
-            assert output == ""
 
 
 class TestContextAnalysis:

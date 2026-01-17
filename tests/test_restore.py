@@ -142,8 +142,8 @@ class TestChangeDetection:
             }
         }
 
-        # Mock to return same branch
-        with mock.patch.object(restore, '_run_git_command') as mock_git:
+        # Mock in restore module's namespace (where it's imported)
+        with mock.patch('restore.run_git_command') as mock_git:
             mock_git.return_value = (True, "main")
 
             result = restore.detect_conflicts(session)
@@ -159,8 +159,8 @@ class TestChangeDetection:
             }
         }
 
-        with mock.patch.object(restore, '_is_git_repo', return_value=True), \
-             mock.patch.object(restore, '_run_git_command') as mock_git:
+        with mock.patch('restore.is_git_repo', return_value=True), \
+             mock.patch('restore.run_git_command') as mock_git:
             mock_git.return_value = (True, "main")
 
             result = restore.detect_conflicts(session)
@@ -177,8 +177,8 @@ class TestChangeDetection:
             }
         }
 
-        with mock.patch.object(restore, '_is_git_repo', return_value=True), \
-             mock.patch.object(restore, '_run_git_command') as mock_git:
+        with mock.patch('restore.is_git_repo', return_value=True), \
+             mock.patch('restore.run_git_command') as mock_git:
             # First call for branch check
             # Second call for status
             mock_git.side_effect = [
