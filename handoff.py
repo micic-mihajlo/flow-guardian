@@ -260,6 +260,10 @@ def update_handoff(updates: dict, project_root: Optional[Path] = None) -> dict:
     # Merge updates into existing
     merged = {**existing, **updates}
 
+    # Normalize files list to prevent duplicates
+    if "files" in merged and merged["files"]:
+        merged["files"] = list(set(merged["files"]))[:5]  # Limit to 5 files
+
     # Always update timestamp
     merged["timestamp"] = datetime.now(timezone.utc).isoformat()
 

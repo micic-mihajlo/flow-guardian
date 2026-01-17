@@ -284,7 +284,8 @@ def search_learnings(query: str, tags: Optional[list[str]] = None) -> list[dict]
             if query_lower in tag.lower():
                 score += 1
 
-        if score > 0:
+        # Only include results with meaningful scores
+        if score > 1:
             results.append((score, learning))
 
     # Sort by score descending, then by timestamp descending
