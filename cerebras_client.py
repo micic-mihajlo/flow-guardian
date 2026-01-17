@@ -11,7 +11,7 @@ from cerebras.cloud.sdk import Cerebras
 
 # ============ CONFIGURATION ============
 
-DEFAULT_MODEL = "llama-3.3-70b"
+DEFAULT_MODEL = "zai-glm-4.7"
 
 
 def _get_api_key() -> str:
