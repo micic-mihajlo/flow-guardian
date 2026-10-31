@@ -1,0 +1,71 @@
+{
+  "project": "micic-mihajlo/flow-guardian",
+  "snapshot_date": "2026-10-31",
+  "repository": "micic-mihajlo/flow-guardian",
+  "backups": [
+    {
+      "ref": "refs/tags/local-backup/2026-10-31/branches/mcp_setup-fccbcd1698",
+      "sha": "fccbcd16986b3eedc2e7141a57d086c965177e5b",
+      "kind": "original-history",
+      "snapshot_id": null,
+      "source_ref": "refs/heads/mcp_setup",
+      "stash_index": null,
+      "verified": true
+    },
+    {
+      "ref": "refs/tags/local-backup/2026-10-31/stashes/stash-0-caa18ff6ca",
+      "sha": "caa18ff6ca171d5639e6818e2a5a36af07914fd6",
+      "kind": "original-history",
+      "snapshot_id": null,
+      "source_ref": null,
+      "stash_index": 0,
+      "verified": true
+    },
+    {
+      "ref": "refs/tags/local-backup/2026-10-31/stashes/stash-1-8cdcf65d69",
+      "sha": "8cdcf65d69e853da84d74c1727ecef89b11948f9",
+      "kind": "original-history",
+      "snapshot_id": null,
+      "source_ref": null,
+      "stash_index": 1,
+      "verified": true
+    }
+  ],
+  "snapshots": [],
+  "local_checkouts": [
+    {
+      "branch": "main",
+      "source_commit": "d5f41797f525343f9b3561c347f0d906a794aa1b",
+      "source_branch_state": "identical",
+      "file_status_verified": true,
+      "changes": []
+    }
+  ],
+  "history_withheld": [],
+  "history_bundle": {
+    "file": "history.bundle",
+    "sha256": "7e1e7c4ac4a5bfc26cb9c25f57fd38dac3f1d849cd28d2911c654c75c3438329",
+    "bytes": 12821,
+    "prerequisite_repository": "micic-mihajlo/flow-guardian",
+    "refs": [
+      {
+        "ref": "refs/audit/local/d7c861a7/heads/mcp_setup",
+        "source_ref": "refs/heads/mcp_setup",
+        "sha": "fccbcd16986b3eedc2e7141a57d086c965177e5b",
+        "stash_index": null
+      },
+      {
+        "ref": "refs/audit/local/d7c861a7/stash/0",
+        "source_ref": null,
+        "sha": "caa18ff6ca171d5639e6818e2a5a36af07914fd6",
+        "stash_index": 0
+      },
+      {
+        "ref": "refs/audit/local/d7c861a7/stash/1",
+        "source_ref": null,
+        "sha": "8cdcf65d69e853da84d74c1727ecef89b11948f9",
+        "stash_index": 1
+      }
+    ]
+  }
+}
